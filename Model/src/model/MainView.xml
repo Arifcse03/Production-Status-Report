@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="windows-1252" ?>
+<!DOCTYPE ViewObject SYSTEM "jbo_03_01.dtd">
+<!---->
+<ViewObject
+  xmlns="http://xmlns.oracle.com/bc4j"
+  Name="MainView"
+  Version="11.1.1.62.29"
+  InheritPersonalization="true"
+  BindingStyle="OracleName"
+  CustomQuery="true"
+  PageIterMode="Full"
+  UseGlueCode="false">
+  <DesignTime>
+    <Attr Name="_isExpertMode" Value="true"/>
+  </DesignTime>
+  <Properties>
+    <SchemaBasedProperties>
+      <LABEL
+        ResId="model.MainView_LABEL"/>
+    </SchemaBasedProperties>
+  </Properties>
+  <Variable
+    Name="param"
+    Kind="where"
+    Type="java.lang.String"/>
+  <SQLQuery>
+    <![CDATA[select
+distinct
+--decode(mmph.production_unit,'CAL Unit1',340,'CGL Unit1',341,'GFL Unit1',342) org_id,
+--ood.organization_name,
+mmph.buyer_id,
+(select 
+ac.customer_name
+from ar_customers ac
+where ac.customer_id = mmph.buyer_id) buyer_name,
+mmph.season season,
+mmph.end_user department,
+(case 
+when mmph.division='Style No.' then mmph.style_no
+when mmph.division='Style Name' then mmph.style_name
+when mmph.division='Other/BPO No.' then mmph.style_name_new
+else nvl(mmph.style_no,mmph.style_name_new)
+end) style,
+--mmpl.colour color,
+mmpl.wash_name wash
+,(select
+sum(moqs.order_qty) order_qty
+from
+mnj_order_qty_summery moqs
+where 1 = 1
+and moqs.wash_name = mmpl.wash_name
+and moqs.colour = mmpl.colour
+and moqs.style = (case 
+when mmph.division='Style No.' then mmph.style_no
+when mmph.division='Style Name' then mmph.style_name
+when mmph.division='Other/BPO No.' then mmph.style_name_new
+else nvl(mmph.style_no,mmph.style_name_new)
+end)
+and moqs.season = mmph.season
+and moqs.buyer_id = mmph.buyer_id
+and moqs.org_id = decode(mmph.production_unit,'CAL Unit1',340,'CGL Unit1',341,'GFL Unit1',342)
+) order_qty
+,nvl((
+select 
+sum(nvl(mmro.production,0)) cutting_qty
+from 
+mnj_mfg_rangeprogram mmrp
+,mnj_mfg_range_obline mmro
+where 1 = 1
+and mmrp.range_id = mmro.range_id
+and substr(substr(mmro.item_description,instr(mmro.item_description,':')+1),1,instr(substr(mmro.item_description,instr(mmro.item_description,':')+1),substr(substr(mmro.item_description,instr(mmro.item_description,':')+1),instr(substr(mmro.item_description,instr(mmro.item_description,':')+1),':')-1))) = mmpl.wash_name
+and substr(substr(mmro.item_description,instr(mmro.item_description,':')+1),instr(substr(mmro.item_description,instr(mmro.item_description,':')+1),':')+1) = mmpl.colour
+and mmrp.style = (case 
+when mmph.division='Style No.' then mmph.style_no
+when mmph.division='Style Name' then mmph.style_name
+when mmph.division='Other/BPO No.' then mmph.style_name_new
+else nvl(mmph.style_no,mmph.style_name_new)
+end)
+and mmrp.season = mmph.season
+and mmrp.buyer_id = mmph.buyer_id
+and mmrp.division_id in (340,341,342)
+and mmrp.division_id = decode(mmph.production_unit,'CAL Unit1',340,'CGL Unit1',341,'GFL Unit1',342)
+--and trunc(mmrp.range_date) <= :p_on_date
+),0) total_cutting
+,nvl((
+select
+sum(nvl(mmcl.issued_quantity,0)) input_qty
+from 
+mnj_mfg_cutissuance mmc
+,mnj_mfg_cutissuance_line mmcl
+where 1 = 1
+and mmc.cutissue_id = mmcl.cutissue_id
+and mmc.color = mmpl.colour
+and mmc.style = (case 
+when mmph.division='Style No.' then mmph.style_no
+when mmph.division='Style Name' then mmph.style_name
+when mmph.division='Other/BPO No.' then mmph.style_name_new
+else nvl(mmph.style_no,mmph.style_name_new)
+end)
+and mmc.season = mmph.season
+and mmc.buyer_id = mmph.buyer_id
+and mmc.division_id in (340,341,342)
+and mmc.division_id = decode(mmph.production_unit,'CAL Unit1',340,'CGL Unit1',341,'GFL Unit1',342)
+--and trunc(mmc.cutissue_dt) <= :p_on_date
+),0) total_input
+,nvl((
+select
+sum(nvl(mmls.line_output,0)) stitching_qty
+from 
+mnj_mfg_lineoutput mml
+,mnj_mfg_lineoutput_sbline mmls
+where 1 = 1
+and mml.prod_trans_id = mmls.prod_trans_id
+and mmls.wash = mmpl.wash_name
+and mmls.color = mmpl.colour
+and mmls.style = (case 
+when mmph.division='Style No.' then mmph.style_no
+when mmph.division='Style Name' then mmph.style_name
+when mmph.division='Other/BPO No.' then mmph.style_name_new
+else nvl(mmph.style_no,mmph.style_name_new)
+end)
+and mmls.season = mmph.season
+and mmls.buyer_id = mmph.buyer_id
+and mml.division_id in (340,341,342)
+and mml.division_id = decode(mmph.production_unit,'CAL Unit1',340,'CGL Unit1',341,'GFL Unit1',342)
+--and trunc(mml.outrec_date) <= :p_on_date
+),0) total_sewing
+,nvl((
+select 
+sum(nvl(mmirwl.quantity,0)) before_wash_delivery_qty
+from 
+mnj_mfg_issue_rec_wash_h mmirwh
+,mnj_mfg_issue_rec_wash_l_h mmirwlh
+,mnj_mfg_issue_rec_wash_l mmirwl
+where 1 = 1
+and mmirwh.header_id = mmirwlh.header_id
+and mmirwlh.line_id = mmirwl.header_id(+)
+and mmirwh.transaction_type = 'After Stitch Issue to 3rd Party'
+and mmirwl.attribute3 = mmpl.colour
+and mmirwlh.style_name = (case 
+when mmph.division='Style No.' then mmph.style_no
+when mmph.division='Style Name' then mmph.style_name
+when mmph.division='Other/BPO No.' then mmph.style_name_new
+else nvl(mmph.style_no,mmph.style_name_new)
+end)
+and mmirwlh.season = mmph.season
+and mmirwlh.buyer_id = mmph.buyer_id
+and mmirwh.org_id in (340,341,342)
+and mmirwh.org_id = decode(mmph.production_unit,'CAL Unit1',340,'CGL Unit1',341,'GFL Unit1',342)
+--and trunc(mmirwh.update_on) <= :p_on_date
+),0) total_delivery_to_wash
+,nvl((
+select
+sum(nvl(mmirwd.attribute4,0)) after_wash_receive_qty
+from 
+mnj_mfg_issue_rec_wash_h mmirwh
+,mnj_mfg_issue_rec_wash_l_h mmirwlh
+,mnj_mfg_issue_rec_wash_d mmirwd
+where 1 = 1
+and mmirwh.header_id = mmirwlh.header_id
+and mmirwlh.line_id = mmirwd.header_id(+)
+and mmirwh.transaction_type = 'Ready For Finish Department'
+and mmirwd.attribute3 = mmpl.colour
+and mmirwlh.style_name = (case 
+when mmph.division='Style No.' then mmph.style_no
+when mmph.division='Style Name' then mmph.style_name
+when mmph.division='Other/BPO No.' then mmph.style_name_new
+else nvl(mmph.style_no,mmph.style_name_new)
+end)
+and mmirwlh.season = mmph.season
+and mmirwlh.buyer_id = mmph.buyer_id
+and mmirwh.org_id in (340,341,342)
+and mmirwh.org_id = decode(mmph.production_unit,'CAL Unit1',340,'CGL Unit1',341,'GFL Unit1',342)
+--and trunc(mmirwh.update_on) <= :p_on_date
+),0) total_rec_from_wash
+,nvl((
+select
+sum(nvl(mmfpl.day_production,0)) finishing_ok_qty
+from
+mnj_mfg_finish_prod_h mmfph
+,mnj_mfg_finish_prod_l mmfpl
+where 1 = 1
+and mmfph.header_id = mmfpl.header_id
+and mmfpl.wash = mmpl.wash_name
+and mmfpl.color = mmpl.colour
+and mmfpl.style = (case 
+when mmph.division='Style No.' then mmph.style_no
+when mmph.division='Style Name' then mmph.style_name
+when mmph.division='Other/BPO No.' then mmph.style_name_new
+else nvl(mmph.style_no,mmph.style_name_new)
+end)
+and mmfpl.season = mmph.season
+and mmfpl.buyer_id = mmph.buyer_id
+and mmfph.org_id in (340,341,342)
+and mmfph.org_id = decode(mmph.production_unit,'CAL Unit1',340,'CGL Unit1',341,'GFL Unit1',342)
+--and trunc(mmfph.doc_date) <= :p_on_date
+),0) total_finishing
+,mmpl.remarks,
+mmph.PRODUCTION_UNIT
+from
+mnj_mfg_precosting_h mmph
+,mnj_mfg_precosting_l mmpl
+,org_organization_definitions ood
+where 1 = :param
+and mmph.header_id = mmpl.header_id
+and decode(mmph.production_unit,'CAL Unit1',340,'CGL Unit1',341,'GFL Unit1',342) = ood.operating_unit
+and mmph.gm_approval = 'Y'
+and mmph.version_no = (select max (h2.version_no) from mnj_mfg_precosting_h h2 where h2.header_no = mmph.header_no and h2.gm_approval = 'Y')
+and mmph.production_unit in ('CAL Unit1','CGL Unit1','GFL Unit1')
+/*and (:p_season is null or :p_season = mmph.season)
+--and (:p_buyer is null or :p_buyer = mmph.buyer_id)
+--and (:p_org_id is null or :p_org_id = decode(mmph.production_unit,'CAL Unit1',340,'CGL Unit1',341,'GFL Unit1',342))*/]]>
+  </SQLQuery>
+  <ViewAttribute
+    Name="BuyerId"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Type="oracle.jbo.domain.Number"
+    ColumnType="NUMBER"
+    AliasName="BUYER_ID"
+    Expression="BUYER_ID"
+    SQLType="NUMERIC">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="39"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ViewAttribute
+    Name="BuyerName"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Precision="50"
+    Type="java.lang.String"
+    ColumnType="VARCHAR2"
+    AliasName="BUYER_NAME"
+    Expression="BUYER_NAME"
+    SQLType="VARCHAR">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="50"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ViewAttribute
+    Name="Season"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Precision="500"
+    Type="java.lang.String"
+    ColumnType="VARCHAR2"
+    AliasName="SEASON"
+    Expression="SEASON"
+    SQLType="VARCHAR">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="500"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ViewAttribute
+    Name="Department"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Precision="100"
+    Type="java.lang.String"
+    ColumnType="VARCHAR2"
+    AliasName="DEPARTMENT"
+    Expression="DEPARTMENT"
+    SQLType="VARCHAR">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="100"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ViewAttribute
+    Name="Style"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Precision="500"
+    Type="java.lang.String"
+    ColumnType="VARCHAR2"
+    AliasName="STYLE"
+    Expression="STYLE"
+    SQLType="VARCHAR">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="500"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ViewAttribute
+    Name="Wash"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Precision="500"
+    Type="java.lang.String"
+    ColumnType="VARCHAR2"
+    AliasName="WASH"
+    Expression="WASH"
+    SQLType="VARCHAR">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="500"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ViewAttribute
+    Name="OrderQty"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Type="oracle.jbo.domain.Number"
+    ColumnType="NUMBER"
+    AliasName="ORDER_QTY"
+    Expression="ORDER_QTY"
+    SQLType="NUMERIC">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="39"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ViewAttribute
+    Name="TotalCutting"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Type="oracle.jbo.domain.Number"
+    ColumnType="NUMBER"
+    AliasName="TOTAL_CUTTING"
+    Expression="TOTAL_CUTTING"
+    SQLType="NUMERIC">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="39"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ViewAttribute
+    Name="TotalInput"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Type="oracle.jbo.domain.Number"
+    ColumnType="NUMBER"
+    AliasName="TOTAL_INPUT"
+    Expression="TOTAL_INPUT"
+    SQLType="NUMERIC">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="39"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ViewAttribute
+    Name="TotalSewing"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Type="oracle.jbo.domain.Number"
+    ColumnType="NUMBER"
+    AliasName="TOTAL_SEWING"
+    Expression="TOTAL_SEWING"
+    SQLType="NUMERIC">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="39"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ViewAttribute
+    Name="TotalDeliveryToWash"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Type="oracle.jbo.domain.Number"
+    ColumnType="NUMBER"
+    AliasName="TOTAL_DELIVERY_TO_WASH"
+    Expression="TOTAL_DELIVERY_TO_WASH"
+    SQLType="NUMERIC">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="39"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ViewAttribute
+    Name="TotalRecFromWash"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Type="oracle.jbo.domain.Number"
+    ColumnType="NUMBER"
+    AliasName="TOTAL_REC_FROM_WASH"
+    Expression="TOTAL_REC_FROM_WASH"
+    SQLType="NUMERIC">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="39"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ViewAttribute
+    Name="TotalFinishing"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Type="oracle.jbo.domain.Number"
+    ColumnType="NUMBER"
+    AliasName="TOTAL_FINISHING"
+    Expression="TOTAL_FINISHING"
+    SQLType="NUMERIC">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="39"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ViewAttribute
+    Name="Remarks"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Precision="500"
+    Type="java.lang.String"
+    ColumnType="VARCHAR2"
+    AliasName="REMARKS"
+    Expression="REMARKS"
+    SQLType="VARCHAR">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="500"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ViewAttribute
+    Name="ProductionUnit"
+    IsUpdateable="false"
+    IsPersistent="false"
+    PrecisionRule="true"
+    Precision="500"
+    Type="java.lang.String"
+    ColumnType="VARCHAR2"
+    AliasName="PRODUCTION_UNIT"
+    Expression="PRODUCTION_UNIT"
+    SQLType="VARCHAR">
+    <DesignTime>
+      <Attr Name="_DisplaySize" Value="500"/>
+    </DesignTime>
+  </ViewAttribute>
+  <ResourceBundle>
+    <PropertiesBundle
+      PropertiesFile="model.ModelBundle"/>
+  </ResourceBundle>
+</ViewObject>

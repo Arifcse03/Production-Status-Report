@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<pageDefinition xmlns="http://xmlns.oracle.com/adfm/uimodel"
+                version="11.1.1.62.29" id="SearchPgPageDef"
+                Package="view.pageDefs">
+  <parameters/>
+  <executables>
+    <variableIterator id="variables"/>
+    <iterator Binds="MainView1" RangeSize="25"
+              DataControl="AppModuleDataControl" id="MainView1Iterator"/>
+    <searchRegion Binds="MainView1Iterator" Criteria=""
+                  Customizer="oracle.jbo.uicli.binding.JUSearchBindingCustomizer"
+                  id="MainView1Query"/>
+    <iterator Binds="SearchVO1" RangeSize="25"
+              DataControl="AppModuleDataControl" id="SearchVO1Iterator"/>
+  </executables>
+  <bindings>
+    <tree IterBinding="MainView1Iterator" id="MainView1">
+      <nodeDefinition DefName="model.MainView" Name="MainView10">
+        <AttrNames>
+          <Item Value="BuyerId"/>
+          <Item Value="BuyerName"/>
+          <Item Value="Season"/>
+          <Item Value="Department"/>
+          <Item Value="Style"/>
+          <Item Value="Wash"/>
+          <Item Value="OrderQty"/>
+          <Item Value="TotalCutting"/>
+          <Item Value="TotalInput"/>
+          <Item Value="TotalSewing"/>
+          <Item Value="TotalDeliveryToWash"/>
+          <Item Value="TotalRecFromWash"/>
+          <Item Value="TotalFinishing"/>
+          <Item Value="Remarks"/>
+        </AttrNames>
+      </nodeDefinition>
+    </tree>
+    <listOfValues StaticList="false" IterBinding="SearchVO1Iterator"
+                  Uses="LOV_Buyer" id="Buyer"/>
+    <attributeValues IterBinding="SearchVO1Iterator" id="BuyerId">
+      <AttrNames>
+        <Item Value="BuyerId"/>
+      </AttrNames>
+    </attributeValues>
+    <list IterBinding="SearchVO1Iterator" StaticList="false" Uses="LOV_Org"
+          id="Org" DTSupportsMRU="false"/>
+    <attributeValues IterBinding="SearchVO1Iterator" id="OrgId">
+      <AttrNames>
+        <Item Value="OrgId"/>
+      </AttrNames>
+    </attributeValues>
+    <listOfValues StaticList="false" IterBinding="SearchVO1Iterator"
+                  Uses="LOV_Season" id="Season"/>
+  </bindings>
+</pageDefinition>

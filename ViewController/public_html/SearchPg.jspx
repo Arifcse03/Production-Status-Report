@@ -1,0 +1,254 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.1"
+          xmlns:f="http://java.sun.com/jsf/core"
+          xmlns:h="http://java.sun.com/jsf/html"
+          xmlns:af="http://xmlns.oracle.com/adf/faces/rich">
+  <jsp:directive.page contentType="text/html;charset=UTF-8"/>
+  <f:view>
+    <af:document id="d1">
+      <af:messages id="m1"/>
+      <af:form id="f1"
+               inlineStyle="color:Black; border-style:dotted; border-color:Black; border-width:medium;">
+        <af:panelHeader text=" " id="ph1" styleClass="AFStretchWidth"
+                        inlineStyle="height:800.0px;">
+          <f:facet name="context"/>
+          <f:facet name="menuBar"/>
+          <f:facet name="toolbar"/>
+          <f:facet name="legend">
+            <af:outputText value="Production Status Report" id="ot1"
+                           inlineStyle="color:Black; font-size:x-large; font-family:Georgia, 'Times New Roman', times, Serif;"/>
+          </f:facet>
+          <f:facet name="info"/>
+          <af:spacer width="20" height="10" id="s3"/>
+          <af:panelFormLayout id="pfl1" maxColumns="10" rows="1"
+                              inlineStyle="background-color:Scrollbar; border-width:thin; border-style:solid; padding:10px;"
+                              labelWidth="150px" styleClass="AFStretchWidth">
+            <af:selectOneChoice value="#{bindings.Org.inputValue}"
+                                label="#{bindings.Org.label}"
+                                required="#{bindings.Org.hints.mandatory}"
+                                shortDesc="#{bindings.Org.hints.tooltip}"
+                                id="soc1" autoSubmit="true">
+              <f:selectItems value="#{bindings.Org.items}" id="si1"/>
+            </af:selectOneChoice>
+            <af:inputListOfValues id="buyerId"
+                                  popupTitle="Search and Select: #{bindings.Buyer.hints.label}"
+                                  value="#{bindings.Buyer.inputValue}"
+                                  label="#{bindings.Buyer.hints.label}"
+                                  model="#{bindings.Buyer.listOfValuesModel}"
+                                  required="#{bindings.Buyer.hints.mandatory}"
+                                  columns="#{bindings.Buyer.hints.displayWidth}"
+                                  shortDesc="#{bindings.Buyer.hints.tooltip}"
+                                  autoSubmit="true">
+              <f:validator binding="#{bindings.Buyer.validator}"/>
+              <af:autoSuggestBehavior suggestedItems="#{bindings.Buyer.suggestedItems}"/>
+            </af:inputListOfValues>
+            <af:inputListOfValues id="seasonId"
+                                  popupTitle="Search and Select: #{bindings.Season.hints.label}"
+                                  value="#{bindings.Season.inputValue}"
+                                  label="#{bindings.Season.hints.label}"
+                                  model="#{bindings.Season.listOfValuesModel}"
+                                  required="#{bindings.Season.hints.mandatory}"
+                                  columns="#{bindings.Season.hints.displayWidth}"
+                                  shortDesc="#{bindings.Season.hints.tooltip}"
+                                  autoSubmit="true" partialTriggers="buyerId">
+              <f:validator binding="#{bindings.Season.validator}"/>
+              <af:autoSuggestBehavior suggestedItems="#{bindings.Season.suggestedItems}"/>
+            </af:inputListOfValues>
+            <af:commandButton text="Search" id="cb1"
+                              action="#{BackinBean.action_call}"
+                              inlineStyle="border-color:Blue; border-style:solid; background-color:Silver; color:Black;"/>
+            <af:commandButton text="Excel Export" id="cb2"
+                              inlineStyle="border-color:Blue; border-style:solid; background-color:Silver; color:Black;">
+              <af:exportCollectionActionListener exportedId="pc1:t1"
+                                                 type="excelHTML"
+                                                 title="Production Status"
+                                                 filename=" production_status_Org:_#{bindings.Org.inputValue}_Buyer:_#{bindings.Buyer.inputValue}_Season:_#{bindings.Season.inputValue}.xls"/>
+            </af:commandButton>
+            <af:inputText value="#{bindings.OrgId.inputValue}"
+                          label="#{bindings.OrgId.hints.label}"
+                          required="#{bindings.OrgId.hints.mandatory}"
+                          columns="#{bindings.OrgId.hints.displayWidth}"
+                          maximumLength="#{bindings.OrgId.hints.precision}"
+                          shortDesc="#{bindings.OrgId.hints.tooltip}" id="it1"
+                          visible="false" autoSubmit="true"
+                          partialTriggers="soc1">
+              <f:validator binding="#{bindings.OrgId.validator}"/>
+            </af:inputText>
+            <af:inputText value="#{bindings.BuyerId.inputValue}"
+                          label="#{bindings.BuyerId.hints.label}"
+                          required="#{bindings.BuyerId.hints.mandatory}"
+                          columns="#{bindings.BuyerId.hints.displayWidth}"
+                          maximumLength="#{bindings.BuyerId.hints.precision}"
+                          shortDesc="#{bindings.BuyerId.hints.tooltip}"
+                          partialTriggers="buyerId" id="it2" visible="false"
+                          autoSubmit="true">
+              <f:validator binding="#{bindings.BuyerId.validator}"/>
+            </af:inputText>
+          </af:panelFormLayout>
+          <af:spacer width="10" height="10" id="s1"/>
+          <af:panelCollection id="pc1" inlineStyle="height:400px;"
+                              styleClass="AFStretchWidth">
+            <f:facet name="menus"/>
+            <f:facet name="toolbar"/>
+            <f:facet name="statusbar"/>
+            <af:table value="#{bindings.MainView1.collectionModel}" var="row"
+                      rows="#{bindings.MainView1.rangeSize}"
+                      emptyText="#{bindings.MainView1.viewable ? 'No data to display.' : 'Access Denied.'}"
+                      fetchSize="#{bindings.MainView1.rangeSize}"
+                      rowBandingInterval="0"
+                      filterModel="#{bindings.MainView1Query.queryDescriptor}"
+                      queryListener="#{bindings.MainView1Query.processQuery}"
+                      filterVisible="true" varStatus="vs"
+                      selectedRowKeys="#{bindings.MainView1.collectionModel.selectedRow}"
+                      selectionListener="#{bindings.MainView1.collectionModel.makeCurrent}"
+                      rowSelection="single" id="t1"
+                      binding="#{BackinBean.mainTable}">
+              <af:column sortProperty="BuyerId" filterable="true"
+                         sortable="true"
+                         headerText="#{bindings.MainView1.hints.BuyerId.label}"
+                         id="c13" visible="false">
+                <af:outputText value="#{row.BuyerId}" id="ot15">
+                  <af:convertNumber groupingUsed="false"
+                                    pattern="#{bindings.MainView1.hints.BuyerId.format}"/>
+                </af:outputText>
+              </af:column>
+              <af:column sortProperty="BuyerName" filterable="true"
+                         sortable="true"
+                         headerText="#{bindings.MainView1.hints.BuyerName.label}"
+                         id="c3" visible="false">
+                <af:outputText value="#{row.BuyerName}" id="ot13"/>
+              </af:column>
+              <af:column sortProperty="Season" filterable="true" sortable="true"
+                         headerText="#{bindings.MainView1.hints.Season.label}"
+                         id="c7" visible="false">
+                <af:outputText value="#{row.Season}" id="ot10"/>
+              </af:column>
+              <af:column sortProperty="Department" filterable="true"
+                         sortable="true"
+                         headerText="#{bindings.MainView1.hints.Department.label}"
+                         id="c4" align="center">
+                <af:outputText value="#{row.Department}" id="ot8"/>
+              </af:column>
+              <af:column sortProperty="Style" filterable="true" sortable="true"
+                         headerText="#{bindings.MainView1.hints.Style.label}"
+                         id="c9">
+                <af:outputText value="#{row.Style}" id="ot3"/>
+              </af:column>
+              <af:column sortProperty="Wash" filterable="true" sortable="true"
+                         headerText="#{bindings.MainView1.hints.Wash.label}"
+                         id="c5">
+                <af:outputText value="#{row.Wash}" id="ot4"/>
+              </af:column>
+              <af:column sortProperty="OrderQty" filterable="true"
+                         sortable="true"
+                         headerText="Order Qty"
+                         id="c14" align="center">
+                <af:outputText value="#{row.OrderQty}" id="ot11">
+                  <af:convertNumber groupingUsed="false"
+                                    pattern="#{bindings.MainView1.hints.OrderQty.format}"/>
+                </af:outputText>
+              </af:column>
+              <af:column sortProperty="TotalCutting" filterable="true"
+                         sortable="true"
+                         headerText="Total Cutting"
+                         id="c12" align="center">
+                <af:outputText value="#{row.TotalCutting}" id="ot2">
+                  <af:convertNumber groupingUsed="false"
+                                    pattern="#{bindings.MainView1.hints.TotalCutting.format}"/>
+                </af:outputText>
+              </af:column>
+              <af:column sortProperty="TotalInput" filterable="true"
+                         sortable="true"
+                         headerText="Total Input"
+                         id="c6">
+                <af:outputText value="#{row.TotalInput}" id="ot6">
+                  <af:convertNumber groupingUsed="false"
+                                    pattern="#{bindings.MainView1.hints.TotalInput.format}"/>
+                </af:outputText>
+              </af:column>
+              <af:column sortProperty="TotalSewing" filterable="true"
+                         sortable="true"
+                         headerText="Total Sewing"
+                         id="c11" align="center">
+                <af:outputText value="#{row.TotalSewing}" id="ot5">
+                  <af:convertNumber groupingUsed="false"
+                                    pattern="#{bindings.MainView1.hints.TotalSewing.format}"/>
+                </af:outputText>
+              </af:column>
+              <af:column sortProperty="Style" filterable="true" sortable="true"
+                         headerText="#{bindings.MainView1.hints.Style.label}"
+                         id="column1" align="center">
+                <af:outputText value="#{row.Style}" id="outputText1"/>
+              </af:column>
+              <af:column sortProperty="Wash" filterable="true" sortable="true"
+                         headerText="#{bindings.MainView1.hints.Wash.label}"
+                         id="column2" align="center">
+                <af:outputText value="#{row.Wash}" id="outputText2"/>
+              </af:column>
+              <af:column sortProperty="OrderQty" filterable="true"
+                         sortable="true"
+                         headerText="Order Qty"
+                         id="column3" align="center">
+                <af:outputText value="#{row.OrderQty}" id="outputText3">
+                  <af:convertNumber groupingUsed="false"
+                                    pattern="#{bindings.MainView1.hints.OrderQty.format}"/>
+                </af:outputText>
+              </af:column>
+              <af:column sortProperty="TotalCutting" filterable="true"
+                         sortable="true"
+                         headerText="Total Cutting"
+                         id="column4" align="center">
+                <af:outputText value="#{row.TotalCutting}" id="outputText4">
+                  <af:convertNumber groupingUsed="false"
+                                    pattern="#{bindings.MainView1.hints.TotalCutting.format}"/>
+                </af:outputText>
+              </af:column>
+              <af:column sortProperty="TotalInput" filterable="true"
+                         sortable="true"
+                         headerText="Total Input"
+                         id="column5" align="center">
+                <af:outputText value="#{row.TotalInput}" id="outputText5">
+                  <af:convertNumber groupingUsed="false"
+                                    pattern="#{bindings.MainView1.hints.TotalInput.format}"/>
+                </af:outputText>
+              </af:column>
+              <af:column sortProperty="TotalDeliveryToWash" filterable="true"
+                         sortable="true"
+                         headerText="Total Delivery To Wash"
+                         id="c2" align="center">
+                <af:outputText value="#{row.TotalDeliveryToWash}" id="ot9">
+                  <af:convertNumber groupingUsed="false"
+                                    pattern="#{bindings.MainView1.hints.TotalDeliveryToWash.format}"/>
+                </af:outputText>
+              </af:column>
+              <af:column sortProperty="TotalRecFromWash" filterable="true"
+                         sortable="true"
+                         headerText="Total Rec From Wash"
+                         id="c10" align="center">
+                <af:outputText value="#{row.TotalRecFromWash}" id="ot14">
+                  <af:convertNumber groupingUsed="false"
+                                    pattern="#{bindings.MainView1.hints.TotalRecFromWash.format}"/>
+                </af:outputText>
+              </af:column>
+              <af:column sortProperty="TotalFinishing" filterable="true"
+                         sortable="true"
+                         headerText="Total Finishing"
+                         id="c8" align="center">
+                <af:outputText value="#{row.TotalFinishing}" id="ot7">
+                  <af:convertNumber groupingUsed="false"
+                                    pattern="#{bindings.MainView1.hints.TotalFinishing.format}"/>
+                </af:outputText>
+              </af:column>
+              <af:column sortProperty="Remarks" filterable="true"
+                         sortable="true"
+                         headerText="#{bindings.MainView1.hints.Remarks.label}"
+                         id="c1" align="center">
+                <af:outputText value="#{row.Remarks}" id="ot12"/>
+              </af:column>
+            </af:table>
+          </af:panelCollection>
+        </af:panelHeader>
+      </af:form>
+    </af:document>
+  </f:view>
+</jsp:root>
