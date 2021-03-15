@@ -126,7 +126,7 @@
               <af:column sortProperty="Department" filterable="true"
                          sortable="true"
                          headerText="#{bindings.MainView1.hints.Department.label}"
-                         id="c4" align="center">
+                         id="c4" align="center" visible="false">
                 <af:outputText value="#{row.Department}" id="ot8"/>
               </af:column>
               <af:column sortProperty="Style" filterable="true" sortable="true"
@@ -177,18 +177,18 @@
               </af:column>
               <af:column sortProperty="Style" filterable="true" sortable="true"
                          headerText="#{bindings.MainView1.hints.Style.label}"
-                         id="column1" align="center">
+                         id="column1" align="center" visible="false">
                 <af:outputText value="#{row.Style}" id="outputText1"/>
               </af:column>
               <af:column sortProperty="Wash" filterable="true" sortable="true"
                          headerText="#{bindings.MainView1.hints.Wash.label}"
-                         id="column2" align="center">
+                         id="column2" align="center" visible="false">
                 <af:outputText value="#{row.Wash}" id="outputText2"/>
               </af:column>
               <af:column sortProperty="OrderQty" filterable="true"
                          sortable="true"
                          headerText="Order Qty"
-                         id="column3" align="center">
+                         id="column3" align="center" visible="false">
                 <af:outputText value="#{row.OrderQty}" id="outputText3">
                   <af:convertNumber groupingUsed="false"
                                     pattern="#{bindings.MainView1.hints.OrderQty.format}"/>
@@ -197,7 +197,7 @@
               <af:column sortProperty="TotalCutting" filterable="true"
                          sortable="true"
                          headerText="Total Cutting"
-                         id="column4" align="center">
+                         id="column4" align="center" visible="false">
                 <af:outputText value="#{row.TotalCutting}" id="outputText4">
                   <af:convertNumber groupingUsed="false"
                                     pattern="#{bindings.MainView1.hints.TotalCutting.format}"/>
@@ -206,7 +206,7 @@
               <af:column sortProperty="TotalInput" filterable="true"
                          sortable="true"
                          headerText="Total Input"
-                         id="column5" align="center">
+                         id="column5" align="center" visible="false">
                 <af:outputText value="#{row.TotalInput}" id="outputText5">
                   <af:convertNumber groupingUsed="false"
                                     pattern="#{bindings.MainView1.hints.TotalInput.format}"/>
