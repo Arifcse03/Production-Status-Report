@@ -114,13 +114,13 @@
               </af:column>
               <af:column sortProperty="BuyerName" filterable="true"
                          sortable="true"
-                         headerText="#{bindings.MainView1.hints.BuyerName.label}"
-                         id="c3" visible="false">
+                         headerText="Buyer"
+                         id="c3" visible="true" align="center">
                 <af:outputText value="#{row.BuyerName}" id="ot13"/>
               </af:column>
               <af:column sortProperty="Season" filterable="true" sortable="true"
                          headerText="#{bindings.MainView1.hints.Season.label}"
-                         id="c7" visible="false">
+                         id="c7" visible="true" align="center">
                 <af:outputText value="#{row.Season}" id="ot10"/>
               </af:column>
               <af:column sortProperty="Department" filterable="true"
